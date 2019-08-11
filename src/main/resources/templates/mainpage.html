@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+
+<script src="https://rawgit.com/notifyjs/notifyjs/master/dist/notify.js"></script>
+
+<script src='https://www.google.com/recaptcha/api.js'></script>
+
+<title th:text="#{label.title}">form</title>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-inverse">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="?lang=en" th:text="#{label.english}">login</a>
+				<a class="navbar-brand" href="?lang=tr" th:text="#{label.turkey}">login</a>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container" style="min-height: 500px">
+		<div class="starter-template">
+			<table class='table table-striped'>
+				<caption th:text="#{label.user}">Kullanıcılar</caption>
+				<thead>
+					<tr>
+						<th th:text="#{label.firstName}">Adı</th>
+						<th th:text="#{label.lastName}">Soyadı</th>
+						<th th:text="#{label.telephone}">Telefon</th>
+						<th th:text="#{label.update}">Güncelle</th>
+						<th th:text="#{label.delete}">Sil</th>
+					</tr>
+				</thead>
+				<tbody id="tBody">
+					<tr th:each="product : ${userdto}">
+						<td th:text="${product.firstName}"></td>
+						<td th:text="${product.lastName}"></td>
+						<td th:text="${product.telephoneNumber}"></td>
+						<td>
+							<button type='button'
+								th:onclick="'refleshUser(\'' + ${product.id} + '\');'"
+								class='btn btn-primary a-btn-slide-text'>
+								<span class='glyphicon glyphicon-edit' aria-hidden='true'></span>
+								<span><strong th:text="#{label.update}">Güncelle</strong></span>
+							</button>
+						</td>
+						<td>
+
+							<button type='button' data-toggle="modal" id="modal"
+								data-target="#deleteDialog"
+								th:onclick="'$(\'input[name=id]\').val(\'' +  ${product.id} +'\')'"
+								class='btn btn-primary a-btn-slide-text'>
+								<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
+								<span><strong th:text="#{label.delete}">Sil</strong></span>
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<button type="button" class="btn btn-info btn-lg" data-toggle="modal"
+				id="modal" data-target="#myModal" th:text="#{label.newuser}">Yeni
+				Kullanıcı</button>
+		</div>
+
+	</div>
+
+	<div class="container">
+		<footer>
+			<p>© Melih Demircan.com 2019</p>
+		</footer>
+	</div>
+
+
+	<div class="modal" tabindex="-1" role="dialog" id="deleteDialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" th:text="#{label.modal.title.delete}"></h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p th:text="#{label.modal.body.delete}"></p>
+					<form action="/" method="POST" enctype="utf8" id="delete-user-form">
+						<input type="hidden" name="id" id="id" />
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" th:text="#{label.close}"
+						class="btn btn-primary"></button>
+					<button class="btn btn-danger" id="btn-delete"
+						th:text="#{label.delete}">
+						<i class="fa fa-check"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Modal -->
+
+	<div class="modal modal-warning fade in" id="myModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h5 class="modal-title" th:text="#{label.newuser}">Yeni
+						Kullanıcı</h5>
+				</div>
+				<div class="modal-body">
+					<div>
+						<form action="/" method="POST" enctype="utf8"
+							id="add-new-user-form">
+
+							<input type="hidden" name="id" id="id" />
+
+							<div class="form-group row">
+								<label class="col-sm-3" th:text="#{label.firstNamedot}">first</label>
+								<span class="col-sm-5"><input class="form-control"
+									name="firstName" value="" required="required" /></span> <span
+									id="firstNameError" class="alert alert-danger col-sm-4"
+									style="display: none"></span>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3" th:text="#{label.lastNamedot}">last</label>
+								<span class="col-sm-5"><input class="form-control"
+									name="lastName" value="" required="required" /></span> <span
+									id="lastNameError" class="alert alert-danger col-sm-4"
+									style="display: none"></span>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3" th:text="#{label.telephonedot}">telephone</label>
+								<span class="col-sm-5"><input class="form-control"
+									name="telephoneNumber" value="" /></span> <span
+									id="telephoneNumberError" class="alert alert-danger col-sm-4"
+									style="display: none"></span>
+							</div>
+							<div class="form-group row">
+								<!-- to enable captcha uncomment the keys in application.properties -->
+								<label class="col-sm-3">Captcha</label>
+								<div class="g-recaptcha col-sm-5"
+									th:attr="data-sitekey=${@captchaService.getReCaptchaSite()}"
+									data-callback="onReCaptchaSuccess"
+									data-expired-callback="onReCaptchaExpired"></div>
+								<span id="captchaError" class="alert alert-danger col-sm-4"
+									style="display: none"></span>
+							</div>
+						</form>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button class="btn btn-outline pull-left" th:text="#{label.close}"
+						data-dismiss="modal">Kapat</button>
+					<button class="btn btn-danger" id="btn-save"
+						th:text="#{label.save}">
+						<i class="fa fa-check"></i>Kaydet
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+
+$(document).ready(function () {
+	$("#btn-save").click(function(event) {
+		$('#add-new-user-form').submit();
+	});
+	$("#btn-delete").click(function(event) {
+		$('#delete-user-form').submit();
+	});
+	
+	$('#delete-user-form').submit(function(event) {
+		event.preventDefault();
+		deleteUser();
+	});
+	
+	
+	$('#add-new-user-form').submit(function(event) {
+		register(event);
+	});
+	$("#modal").click(function(event) {
+		$("input[name=firstName]").val("");
+		$("input[name=lastName]").val("");
+		$("input[name=telephoneNumber]").val("");
+        grecaptcha.reset();
+	});
+});
+
+function register(event){
+	event.preventDefault();
+    $(".alert").html("").hide();
+    $(".error-list").html("");
+
+    if (typeof grecaptcha !== 'undefined') {
+        var resp = grecaptcha.getResponse();
+        if (resp.length == 0) {
+            $("#captchaError").show().html("Please verify that you are not a robot.");
+            return;
+        }
+    }
+    var formData= $('#add-new-user-form').serialize();
+    $.post("mainpage",formData ,function(data){
+        grecaptcha.reset();
+    	if(data.message == "success"){
+
+    		$.notify( [[#{message.success}]] , "success");
+
+    		$('#myModal').modal('hide');
+
+    		
+        	console.log("UserDtos : " + data.userDtos);
+
+        	refleshTable(data.userDtos);
+	 	}        
+    })
+    .fail(function(data) {
+        grecaptcha.reset();
+
+        $.notify( [[#{message.error}]] ,"error");
+        
+        if(data.responseJSON.error == "InvalidReCaptcha"){
+            $("#captchaError").show().html(data.responseJSON.message);
+        }
+        else{
+        	console.log("Message : " + data.responseJSON.message);
+        	var errors = $.parseJSON(data.responseJSON.message);
+            $.each( errors, function( index,item ){
+                $("#"+item.field+"Error").show().html(item.defaultMessage);
+            });
+            errors = $.parseJSON(data.responseJSON.error);
+            $.each( errors, function( index,item ){
+                $("#globalError").show().append(item.defaultMessage+"<br/>");
+            });
+        }
+    });
+}
+function deleteUser(id) {
+	$.ajax({
+		type : "POST",
+		url : "/api/delete/" + $("input[name=id]").val(),
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+    		$.notify( [[#{message.deleteuser}]] , "success");
+			refleshTable(data.userDtos);
+    		$('#deleteDialog').modal('hide');
+		},
+		error : function(errors) {
+	        $.notify( [[#{message.error}]] ,"error");
+		}
+	});
+}
+
+function refleshUser(id) {
+	$.ajax({
+		type : "POST",
+		url : "/api/reflesh/" + id,
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			$("input[name=firstName]").val(data.userDtoEdit.firstName);
+			$("input[name=lastName]").val(data.userDtoEdit.lastName);
+			$("input[name=telephoneNumber]").val(data.userDtoEdit.telephoneNumber);
+			$("input[name=id]").val(data.userDtoEdit.id);
+			$('#myModal').modal('show');
+		},
+		error : function(errors) {
+	        $.notify( [[#{message.error}]] ,"error");
+		}
+	});
+}
+
+function refleshTable(data) {
+
+	 var trHTML = '';
+     $.each(data, function (i, userDto) {
+			refleshid = 'refleshUser("' + userDto.id + '")';
+	      	deleteid = '$("input[name=id]").val("' + userDto.id + '")';
+
+             trHTML +=
+                 '<tr><td>'
+                 + userDto.firstName
+                 + '</td><td>'
+                 + userDto.lastName
+                 + '</td><td>'
+                 + userDto.telephoneNumber
+                 + '</td><td>'
+                 + "<button type='button' onclick='"
+					+ refleshid
+					+ "'"
+					+ "class='btn btn-primary a-btn-slide-text'>"
+					+ "<span class='glyphicon glyphicon-edit' aria-hidden='true'></span> <span><strong>"+[[#{label.update}]]+"</strong></span>"
+					+ "</button>"
+                 + '</td><td>'
+                 + "<button type='button' onclick='"
+					+ deleteid
+					+ "'"
+					+ "data-toggle='modal' id='modal' data-target='#deleteDialog'"
+					+ "class='btn btn-primary a-btn-slide-text'>"
+					+ "<span class='glyphicon glyphicon-remove' aria-hidden='true'></span> <span><strong>"+[[#{label.delete}]]+"</strong></span>"
+					+ "</button>" 
+                 + '</td></tr>';
+     });
+     $('#tBody').html(trHTML);
+}
+var onReCaptchaSuccess = function(response) {
+    $("#captchaError").html("").hide();
+};
+
+var onReCaptchaExpired = function(response) {
+    $("#captchaError").html("reCaptcha has expired.  Please solve a new reCaptcha").show();
+    grecaptcha.reset();
+};
+
+</script>
+
+</body>
+
+</html>
